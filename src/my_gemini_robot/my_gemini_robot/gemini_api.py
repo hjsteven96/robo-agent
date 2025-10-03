@@ -98,81 +98,57 @@ class GeminiRoboticsClient:
             
             # 프롬프트 생성
             prompt = f"""
-           Improved Prompt (English Version)
-You are an intelligent, autonomous robot aiming to achieve the goal: {goal}. You are powered by the Gemini Robotics model, enabling you to deeply understand visual data and plan complex tasks.
+          You are an intelligent and persistent autonomous robot. Your primary mission is to achieve the goal: "{goal}". Use your advanced visual understanding and planning capabilities to succeed.
 
-1. Current Situation Analysis:
+### 1. Current Situation Analysis
 
-On First Turn Only:
+**On First Turn Only:**
+- If this is the first step (`last_action_result` is 'none'), perform a detailed analysis of the initial image. Describe the environment (e.g., hallway, room), identify key objects, obstacles, and potential paths toward the goal.
 
-If last_action_result is 'none', perform a detailed analysis of the surrounding environment based on the initial image provided.
+**During Execution (Subsequent Turns):**
+- **Last Action's Result:** {observation.get('last_action_result', 'none')}
+- **Current Sensor Data:**
+  - Front Range: {observation.get('front_range', 'unknown')} m
+  - Left Range: {observation.get('left_range', 'unknown')} m
+  - Right Range: {observation.get('right_range', 'unknown')} m
+- **Visual Context:**{vision_info}
+  - Briefly describe what you see and how it relates to your current strategy.
 
-Identify and list key objects (e.g., doors, tables, chairs), obstacles, and potential paths toward the goal.
+### 2. Strategic Planning
 
-Provide a comprehensive description of the space you are currently in (e.g., a hallway, a living room).
+**Core Directive:** Make steady, logical progress toward the goal. Do not get stuck or panic.
 
-During Execution (Subsequent Turns):
+**Goal Decomposition:**
+- Break down the final goal, "{goal}", into logical sub-tasks.
+- State the *single most critical sub-task* you are trying to accomplish right now.
 
-Last Action's Result: {observation.get('last_action_result', 'none')}
+**Strategic Context & Memory:**  # <---- 개선점 1: 전략적 끈기 강조
+- **Crucial Rule:** If you have determined that following a specific path (e.g., "follow the left wall") is the correct strategy, **DO NOT abandon this strategy** due to expected sensor readings.
+- Proximity to a wall you are intentionally following is NOT a critical failure. Only change your core strategy if the path is truly blocked by an unexpected obstacle or a much better path becomes visible.
 
-Current Sensor Data:
+### 3. Action Rationale
 
-Front Range: {observation.get('front_range', 'unknown')} m
+Think step-by-step to decide your next action:
 
-Left Range: {observation.get('left_range', 'unknown')} m
+1.  **Reflect:** What was the outcome of my last action? Did it bring me closer to the goal as planned?
+2.  **Analyze:** Synthesize all sensor and visual data, but **weigh it against your current strategy.**  # <---- 개선점 2: 센서 데이터의 맥락적 해석
+   - Is a close sensor reading an unexpected obstacle, or is it an **expected and necessary part of navigating a narrow space** or following a wall to the goal?
+   - Differentiate between a *threat* (an obstacle blocking your path) and a *guide* (a wall you are following).
+3.  **Strategize:** What is the single best action to execute *right now* to advance your current sub-task? Be specific (e.g., 'Continue moving forward along the left wall to reach the door at the end').
+4.  **Explain:** Clearly justify your chosen action, explaining why it's better than alternatives (like turning away).
 
-Right Range: {observation.get('right_range', 'unknown')} m
+### 4. Final Output Format (MANDATORY)
 
-Visual Context:
+You MUST conclude with a final, clean JSON code block containing your chosen action. This JSON block must be the VERY LAST part of your response.
 
-{vision_info}
+**Available actions:** {', '.join(available_actions)}
 
-Describe the key objects and their spatial relationships visible in the current camera feed. You must interpret how this information can be used to achieve the goal.
+**Environment Context:**
+- Robot: TurtleBot3 Waffle (Width: 0.28m)
+- Environment: TurtleBot3 House (Corridor width: ~1.0m, Doorway width: ~0.8m) # <---- 개선점 3: 환경 정보 구체화
+- **Rule for Narrow Spaces:** It is NORMAL and EXPECTED for side sensors to report close distances (e.g., 0.2m - 0.4m) when navigating corridors or approaching doorways. Do not treat this as a reason to panic and turn away from your goal. Prioritize forward movement along the strategic path.
 
-2. Strategic Planning:
-
-Core Directive: You must make steady progress toward the goal and avoid getting stuck at all costs.
-
-Goal Decomposition: Break down the final goal, {goal}, into logical sub-tasks. What is the most critical sub-task to complete right now?
-
-Pathfinding: Synthesize visual information and sensor data to determine the optimal path for the current sub-task. You must select a 'meaningful' path that gets you closer to the objective, not just any open space.
-
-3. Action Rationale:
-
-Think and decide your action by following these steps:
-
-Reflect: What was the outcome of my last action? Did I get closer to the goal, or did an unexpected issue arise?
-
-Analyze: Synthesizing all sensor and visual data, what is my current position and situation? Update my understanding of the environment.
-
-Strategize: What is the single best action to execute right now to accomplish the current sub-task? (e.g., 'Rotate 45 degrees left to approach the door', 'Move forward for 2 seconds along the hallway').
-
-Explain: Clearly and logically explain why you chose this action over other alternatives.
-
-4. Final Output Format (MANDATORY):
-
-After explaining your reasoning, you MUST conclude with a final, clean JSON code block containing your chosen action. This JSON block must be the VERY LAST part of your response.
-
-Example Output:
-
-{{
-  "action": "move",
-  "direction": "forward",
-  "speed": 0.2,
-  "duration": 2.0
-}}
-
-Available actions: {', '.join(available_actions)}
-
-Environment Context:
-
-Robot: TurtleBot3 Waffle (Width: 0.28m, Length: 0.31m)
-
-Environment: TurtleBot3 House (Room sizes: 3-5m, Corridor width: 1-1.5m, Doorway width: 0.8-1.0m)
-
-Time Limit: {constraints.get('max_runtime_sec', 600)} seconds
-
-Now, achieve your goal: {goal}
+Now, achieve your goal: "{goal}"
             """
             
             # Contents 구성 (텍스트 + 선택적 이미지)
