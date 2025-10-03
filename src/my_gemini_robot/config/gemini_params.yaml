@@ -1,0 +1,24 @@
+# Gemini Robot 설정 파일
+
+/**:
+  ros__parameters:
+    # 에이전트 설정
+    timer_period_sec: 15.0       # 에이전트 루프 주기 (초) - API 할당량 절약
+    max_steps: 300               # 최대 스텝 수
+    max_runtime_sec: 600         # 최대 실행 시간 (초)
+    
+    # 안전 설정 (TurtleBot3 House 환경 최적화)
+    safety_stop_distance_m: 0.25 # 긴급 회피 거리 - 로봇 폭(0.28m)보다 약간 작게
+    max_linear_speed: 1.0        # 물리적 최대 선속도 (m/s) - Gemini가 실제 속도 결정
+    max_angular_speed: 2.0       # 물리적 최대 각속도 (rad/s) - Gemini가 실제 각속도 결정
+    
+    # 비전 설정
+    publish_rate_hz: 2.0         # 비전 발행 주기 (Hz)
+    vision_check_interval: 10    # N스텝마다 비전 활성화 (할당량 절약: 5→10)
+    
+    # Gemini API 설정
+    use_gemini_api: true         # Gemini API 사용 여부
+    gemini_model_id: "gemini-robotics-er-1.5-preview"
+    gemini_temperature: 1.0      # 창의성 (0.0-1.0)
+    gemini_thinking_budget: 0    # 사고 예산 (0=비활성화, 높은값=정확) - 대부분 모델은 미지원
+

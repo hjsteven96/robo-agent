@@ -1,0 +1,15 @@
+# ROS2 패키지 (시스템 패키지로 설치됨)
+# rclpy
+# std_msgs
+# geometry_msgs
+# sensor_msgs
+
+# Gemini API
+google-genai>=0.1.0
+
+# 이미지 처리
+Pillow>=10.0.0
+
+# 기타
+python-dotenv>=1.0.0
+
